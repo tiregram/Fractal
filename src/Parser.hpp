@@ -11,11 +11,13 @@
 class OpenCLWrapper {
 
 private:
+  cl::Program program;
+  cl::Program::Sources sources;
+  cl::Context context;
+
   cl::Buffer buffer_A;
   cl::Buffer buffer_B;
   cl::Buffer buffer_C;
-
-  int context;
 
   std::vector<std::pair<cl::Platform, std::vector<cl::Device>>>
       list_plat_list_dev;
@@ -33,12 +35,12 @@ public:
   void selectByDefault();
   void selectAll();
 
-  void run(int h, int w, float jp_x, foat jp_y, float x, float y) {
+  void run(int h, int w, float jp_x, float jp_y, float x, float y) {
 
     float A[] = {jp_x, jp_y};
     int B[] = {w, h};
 
-    cl::CommandQueue queue(context, this->select_device);
+    cl::CommandQueue queue(context, this->select_device[0]);
 
     queue.enqueueWriteBuffer(buffer_A, CL_TRUE, 0, sizeof(float) * 2, A);
     queue.enqueueWriteBuffer(buffer_B, CL_TRUE, 0, sizeof(int) * 1, B);
@@ -61,6 +63,8 @@ public:
 
   void loadSource(std::string name_file_src, int max_x, int max_y) {
 
+    this->context({this->select_device[0]});
+
     this->max_x = max_x;
     this->max_y = max_y;
 
@@ -69,7 +73,7 @@ public:
 
     sources.push_back({kernel_code.c_str(), kernel_code.length()});
 
-    cl::Program program(context, sources);
+    program(context, sources);
 
     if (program.build({default_device}) != CL_SUCCESS) {
       std::cout << " Error building: "
@@ -83,7 +87,8 @@ public:
     this->buffer_C(context, CL_MEM_READ_WRITE, sizeof(int) * max_x * max_y);
   }
 
-  Protected : bool reloadPlatformFound();
+  protected:
+  bool reloadPlatformFound();
 
   bool Compile();
 
