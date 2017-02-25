@@ -127,8 +127,8 @@ bool OpenCLWrapper::selectByString(std::string select) {
 
     auto dev_list = this->list_plat_list_dev[ip].second;
     if (allDeviceOfThisPlatformGlobal) {
-      
-      return;
+
+      return true;
     }
     if (id < 0) {
       std::cout << "Device number is less than 0"

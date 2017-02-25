@@ -23,7 +23,7 @@ else()
 endif()
 
 
-find_package(Qt5 COMPONENTS Quick Core Network)
+find_package(Qt5 COMPONENTS Quick Widgets Core Network)
 #find_package(Qt5QuickCompiler)
 
 #qtquick_compiler_add_resources(RESOURCES example.qrc)
@@ -43,5 +43,5 @@ target_link_libraries(fract.bin
   ${PNG_LIBRARY}
 )
 
-qt5_use_modules(fract.bin Quick Core Network)
+qt5_use_modules(fract.bin Quick Widgets Core Network)
 

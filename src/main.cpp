@@ -1,17 +1,97 @@
 
-
-#include <fstream>
 #include <iostream>
 #include <string>
 
 #include "Image.hpp"
 #include "Parser.hpp"
 
+#include <QCoreApplication>
+#include <QDebug>
+#include <QDir>
+#include <QFileInfo>
+#include <QPainter>
+#include <QQmlComponent>
+#include <QQmlContext>
+#include <QQmlEngine>
+#include <QQuickView>
+#include <QWidget>
+#include <QtQuick>
+
+//#include <QtWidgets/QPushButton>
 // string readAllFile(ifstream &in) {
 //   stringstream sstr;
 //   sstr << in.rdbuf();
 //   return sstr.str();
 // }
+
+class ColorImageProvider : public QQuickImageProvider {
+public:
+  ColorImageProvider() : QQuickImageProvider(QQuickImageProvider::Pixmap) {}
+
+  QPixmap requestPixmap(const QString &id, QSize *size,
+                        const QSize &requestedSize) {
+    int width = 100;
+    int height = 50;
+
+    if (size)
+      *size = QSize(width, height);
+    QPixmap pixmap(requestedSize.width() > 0 ? requestedSize.width() : width,
+                   requestedSize.height() > 0 ? requestedSize.height()
+                                              : height);
+    pixmap.fill(QColor(id).rgba());
+
+    return pixmap;
+  }
+};
+
+class FractImageProvider : public QQuickImageProvider {
+public:
+  FractImageProvider() : QQuickImageProvider(QQmlImageProviderBase::Image, 0) {}
+
+  QImage requestImage(const QString &id, QSize *size,
+                      const QSize &requestedSize) {
+
+    const int width = requestedSize.width();
+    const int height = requestedSize.height();
+
+    size->setWidth(width);
+    size->setHeight(height);
+
+    std::cout << "lapin is cool " << width << "X" << height << size
+              << std::endl;
+    uchar *data = new uchar[width * height * 4];
+
+    uchar *ite = data;
+
+    for (unsigned int x = 0; x < width; ++x) {
+      *(ite++) = 0;
+      *(ite++) = 0;
+      *(ite++) = 255;
+      *(ite++) = 255;
+    }
+
+    QImage image(data, width, height, QImage::Format_ARGB32);
+
+    return image;
+  }
+};
+
+int main_graphique(int argc, char *argv[]) {
+  QGuiApplication app(argc, argv);
+
+  QQuickView viewer;
+  QQmlEngine *engine = viewer.engine();
+
+  auto a = new FractImageProvider();
+
+  engine->addImageProvider(QLatin1String("colors"), new ColorImageProvider());
+  engine->addImageProvider("fract", a);
+
+  viewer.setSource(QUrl::fromLocalFile("src/qml/test.qml"));
+  viewer.show();
+
+  return app.exec();
+}
 
 int main(int argc, char *argv[]) {
 
@@ -22,19 +102,13 @@ int main(int argc, char *argv[]) {
   std::cout << "select platforms.device platforms.device default(0.0):"
             << "\n";
   std::string plat_dev;
-  std::getline(std::cin,plat_dev);
+  std::getline(std::cin, plat_dev);
 
   std::cout << plat_dev << "\n";
   oc.selectByString(plat_dev);
   oc.print_plat_dev();
 
-  // cl::Context context({default_device});
-
-  // cl::Program::Sources sources;
-
-  // // kernel calculates for each element C=A+B
-  // ifstream fie("ocl_src/frac.c");
-  // std::string kernel_code = readAllFile(fie);
+  main_graphique(argc, argv);
 
   // sources.push_back({kernel_code.c_str(), kernel_code.length()});
 
@@ -47,14 +121,6 @@ int main(int argc, char *argv[]) {
   // }
 
   // int size = atoi(argv[1]);
-
-  // // create buffers on the device
-  // cl::Buffer buffer_A(context, CL_MEM_READ_WRITE, sizeof(float) * 2);
-  // cl::Buffer buffer_B(context, CL_MEM_READ_WRITE, sizeof(int) * 1);
-  // cl::Buffer buffer_C(context, CL_MEM_READ_WRITE, sizeof(int) * size * size);
-
-  // float A[] = {atof(argv[2]), atof(argv[3])};
-  // int B[] = {size};
 
   // cl::CommandQueue queue(context, default_device);
 
@@ -82,3 +148,6 @@ int main(int argc, char *argv[]) {
 
   // return 0;
 }
+
+
+#include "main.moc"
