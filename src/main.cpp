@@ -24,29 +24,35 @@
 //   return sstr.str();
 // }
 
-class ColorImageProvider : public QQuickImageProvider {
-public:
-  ColorImageProvider() : QQuickImageProvider(QQuickImageProvider::Pixmap) {}
+// class ColorImageProvider : public QQuickImageProvider {
+// public:
+//   ColorImageProvider() : QQuickImageProvider(QQuickImageProvider::Pixmap) {}
 
-  QPixmap requestPixmap(const QString &id, QSize *size,
-                        const QSize &requestedSize) {
-    int width = 100;
-    int height = 50;
+//   QPixmap requestPixmap(const QString &id, QSize *size,
+//                         const QSize &requestedSize) {
+//     int width = 100;
+//     int height = 50;
 
-    if (size)
-      *size = QSize(width, height);
-    QPixmap pixmap(requestedSize.width() > 0 ? requestedSize.width() : width,
-                   requestedSize.height() > 0 ? requestedSize.height()
-                                              : height);
-    pixmap.fill(QColor(id).rgba());
+//     if (size)
+//       *size = QSize(width, height);
+//     QPixmap pixmap(requestedSize.width() > 0 ? requestedSize.width() : width,
+//                    requestedSize.height() > 0 ? requestedSize.height()
+//                                               : height);
+//     pixmap.fill(QColor(id).rgba());
 
-    return pixmap;
-  }
-};
+//     return pixmap;
+//   }
+// };
 
 class FractImageProvider : public QQuickImageProvider {
+private:
+  OpenCLWrapper *oc;
+
 public:
-  FractImageProvider() : QQuickImageProvider(QQmlImageProviderBase::Image, 0) {}
+  FractImageProvider(OpenCLWrapper *oc)
+      : QQuickImageProvider(QQmlImageProviderBase::Image, 0) {
+    this->oc = oc;
+  }
 
   QImage requestImage(const QString &id, QSize *size,
                       const QSize &requestedSize) {
@@ -54,21 +60,24 @@ public:
     const int width = requestedSize.width();
     const int height = requestedSize.height();
 
+    std::cout << id .toUtf8().constData() << "\n";
     size->setWidth(width);
     size->setHeight(height);
 
     std::cout << "lapin is cool " << width << "X" << height << size
               << std::endl;
-    uchar *data = new uchar[width * height * 4];
+    //uchar * data = new uchar[width * height * 4];
 
+    uchar * data= (uchar*)oc->run(height, width, 0, 0.68, 0, 0,300);
     uchar *ite = data;
 
-    for (unsigned int x = 0; x < width; ++x) {
-      *(ite++) = 0;
-      *(ite++) = 0;
-      *(ite++) = 255;
+    for (unsigned int x = 0; x < width*height; ++x) {
+      ite++; // r
+      ite++; // G
+      ite++; // b
       *(ite++) = 255;
     }
+
 
     QImage image(data, width, height, QImage::Format_ARGB32);
 
@@ -76,15 +85,16 @@ public:
   }
 };
 
-int main_graphique(int argc, char *argv[]) {
+int main_graphique(int argc, char *argv[], OpenCLWrapper *oc) {
   QGuiApplication app(argc, argv);
 
   QQuickView viewer;
   QQmlEngine *engine = viewer.engine();
 
-  auto a = new FractImageProvider();
+  auto a = new FractImageProvider(oc);
 
-  engine->addImageProvider(QLatin1String("colors"), new ColorImageProvider());
+  //  engine->addImageProvider(QLatin1String("colors"), new
+  //  ColorImageProvider());
   engine->addImageProvider("fract", a);
 
   viewer.setSource(QUrl::fromLocalFile("src/qml/test.qml"));
@@ -108,7 +118,9 @@ int main(int argc, char *argv[]) {
   oc.selectByString(plat_dev);
   oc.print_plat_dev();
 
-  main_graphique(argc, argv);
+  oc.loadSource("ocl_src/frac.c", 1920, 1080);
+
+  main_graphique(argc, argv, &oc);
 
   // sources.push_back({kernel_code.c_str(), kernel_code.length()});
 
@@ -148,6 +160,5 @@ int main(int argc, char *argv[]) {
 
   // return 0;
 }
-
 
 #include "main.moc"

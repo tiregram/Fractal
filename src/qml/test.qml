@@ -10,22 +10,30 @@ Item {
     
     anchors.fill: parent
     
-    
     MouseArea {
-            
+              
         width:root.width
         height:root.height
         onMouseXChanged: xtx.value=mouseX
         onMouseYChanged: ytx.value=mouseY
-        onClicked: {
-                   img.source= "image://fract/yellow"
+        property int priv_x;
+        property int priv_y;
+        property int zoom;
 
+        onClicked: {
+            indicator.running = true;
+            imag.source= "image://fract/" + 0 + "/" + 0.69 + "/" + zoom + "/" + priv_x +    "/" + priv_y+Math.random(100);
         }
+
+        onWheel:
+        {
+                zoom = zoom*1.1;
+        }
+
     }
-        
 
     Image {
-        id:img
+        id:imag
         anchors.centerIn: parent ;
         sourceSize.width: root.width    
         sourceSize.height: root.height
@@ -35,22 +43,14 @@ Item {
                 indicator.running = false;
         }
 
+    }
         BusyIndicator {
             id: indicator
             anchors.centerIn: parent
             running: false
         }
 
-        MouseArea {
-            anchors.fill: parent
-            onClicked: {
-                indicator.running = true;
-                img.source = "image://fract/500/500/?seed=" + Math.random(1000)
-            }
-        }
-    }
-    
-    
+
      ColumnLayout {
         
         anchors.margins: spacing

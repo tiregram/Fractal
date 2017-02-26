@@ -7,6 +7,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 class OpenCLWrapper {
 
@@ -35,15 +36,15 @@ public:
   void selectByDefault();
   void selectAll();
 
-  void run(int h, int w, float jp_x, float jp_y, float x, float y) {
+  unsigned int *run(int h, int w, float jp_x, float jp_y, float x, float y, float zoom) {
 
-    float A[] = {jp_x, jp_y};
-    int B[] = {w, h};
+    float A[] = {jp_x, jp_y,x,y,zoom};
+    int B[] = {h, w};
 
     cl::CommandQueue queue(context, this->select_device[0]);
 
-    queue.enqueueWriteBuffer(buffer_A, CL_TRUE, 0, sizeof(float) * 2, A);
-    queue.enqueueWriteBuffer(buffer_B, CL_TRUE, 0, sizeof(int) * 1, B);
+    queue.enqueueWriteBuffer(buffer_A, CL_TRUE, 0, sizeof(float) * 5 , A);
+    queue.enqueueWriteBuffer(buffer_B, CL_TRUE, 0, sizeof(int) * 2   , B);
 
     cl::Kernel kernel_add = cl::Kernel(program, "frac");
 
@@ -55,15 +56,18 @@ public:
                                cl::NullRange);
     queue.finish();
 
-    int *C = new int[h * w];
+    unsigned int *C = new unsigned int[h * w];
+
     queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, sizeof(int) * h * w, C);
 
     std::cout << "end calcul" << std::endl;
+    return C;
   }
 
   void loadSource(std::string name_file_src, int max_x, int max_y) {
 
-    this->context({this->select_device[0]});
+    auto default_device = this->select_device[0];
+    context = cl::Context({default_device});
 
     this->max_x = max_x;
     this->max_y = max_y;
@@ -73,21 +77,26 @@ public:
 
     sources.push_back({kernel_code.c_str(), kernel_code.length()});
 
-    program(context, sources);
+    program = cl::Program(context, sources);
 
     if (program.build({default_device}) != CL_SUCCESS) {
       std::cout << " Error building: "
-                << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(this->select_device)
+                << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(
+                       this->select_device[0])
                 << "\n";
       exit(1);
     }
 
-    this->buffer_A(context, CL_MEM_READ_WRITE, sizeof(float) * 2);
-    this->buffer_B(context, CL_MEM_READ_WRITE, sizeof(int) * 1);
-    this->buffer_C(context, CL_MEM_READ_WRITE, sizeof(int) * max_x * max_y);
+    std::cout <<"No build error =)"  << "\n";
+
+    this->buffer_A = cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(float) * 5);
+    this->buffer_B = cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(int) * 2);
+    this->buffer_C =
+        cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(int) * max_x * max_y);
+
   }
 
-  protected:
+protected:
   bool reloadPlatformFound();
 
   bool Compile();

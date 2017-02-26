@@ -5,9 +5,16 @@ void kernel frac(global const float* A,
                        global int* C)
 {
 
-  int size = B[0];
-  double x = get_global_id(0) / (size);
-  double y = get_global_id(0) % (size);
+  int height = B[0];
+  int width =  B[1];
+
+  int x = A[2];
+  int y = A[3];
+
+  int zoom = A[4];
+
+  double x_image = get_global_id(0) % (width);
+  double y_image = get_global_id(0) / (width);
 
   Complex zn;
   Complex c;
@@ -15,8 +22,8 @@ void kernel frac(global const float* A,
   c.s0= A[0];
   c.s1= A[1];
 
-  zn.s0 = (((x/size) * 3 ) - 1.5 );
-  zn.s1 = (((y/size) * 3 ) - 1.5);
+  zn.s0 = ((x_image-width/2)/zoom) + x;
+  zn.s1 = ((y_image-height/2)/zoom) + y;
 
   int i = 0;
     do
