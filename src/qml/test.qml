@@ -11,14 +11,14 @@ Item {
     anchors.fill: parent
     
     MouseArea {
-              
+        
         width:root.width
         height:root.height
         onMouseXChanged: xtx.value=mouseX
         onMouseYChanged: ytx.value=mouseY
         property int priv_x;
         property int priv_y;
-        property int zoom;
+        property int zoom ;
 
         onClicked: {
             indicator.running = true;
@@ -27,7 +27,7 @@ Item {
 
         onWheel:
         {
-                zoom = zoom*1.1;
+            zoom = zoom*1.1+1;
         }
 
     }
@@ -44,27 +44,27 @@ Item {
         }
 
     }
-        BusyIndicator {
-            id: indicator
-            anchors.centerIn: parent
-            running: false
-        }
+    BusyIndicator {
+        id: indicator
+        anchors.centerIn: parent
+        running: false
+    }
 
 
-     ColumnLayout {
+    ColumnLayout {
         
         anchors.margins: spacing
         RowLayout {
-    
+            
             SpinBox {
                 id: xtx
                 maximumValue: 10000
-              
+                
             }
-    
+            
             SpinBox {
-              id:ytx
-              maximumValue: 10000
+                id:ytx
+                maximumValue: 10000
             }
         }
     }
