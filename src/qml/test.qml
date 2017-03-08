@@ -1,41 +1,76 @@
 // Project "Frac"
 import QtQuick 2.4
-import QtQuick.Controls 1.3
+import QtQuick.Controls 2.1
 import QtQuick.Layouts 1.1
 import QtQuick.Window 2.2
 
 
 Item {
     id: root
-    
     anchors.fill: parent
-    
+
     MouseArea {
-        
+
         width:root.width
         height:root.height
         onMouseXChanged: xtx.value=mouseX
         onMouseYChanged: ytx.value=mouseY
-        property int priv_x;
-        property int priv_y;
-        property int zoom ;
+        property int start_x;
+        property int start_y;
+
+        property double  start_pos_x;
+        property double start_pos_y;
+
+        property double zoom ;
 
         onClicked: {
             indicator.running = true;
-            imag.source= "image://fract/" + 0 + "/" + 0.69 + "/" + zoom + "/" + priv_x +    "/" + priv_y+Math.random(100);
+            imag.source= "image://fract/" + xtx.value + "/" + ytx.value + "/" + zoom + "/" + position.priv_x +"/" +position.priv_y
         }
 
-        onWheel:
-        {
-            zoom = zoom*1.1+1;
+        onWheel: {
+            if (wheel.angleDelta.y > 0)
+            {
+                zoom = zoom*1.03+1;
+                zoomsb.value = zoom;
+            }
+            else
+            {
+                zoom = zoom*0.97;
+                zoomsb.value = zoom;
+            }
+
+            indicator.running = true;
+            imag.source= "image://fract/" + xtx.value + "/" + ytx.value + "/" + zoom + "/" + position.priv_x +"/" +position.priv_y
+
         }
+
+        onPressed:{
+            start_x = mouse.x
+            start_y = mouse.y
+            start_pos_x = position.priv_x
+            start_pos_y = position.priv_y
+
+        }
+        onPositionChanged:{
+            position.priv_x = + (mouse.x - start_x)/zoom*10 + start_pos_x
+            position.priv_y = + (mouse.y - start_y)/zoom*10 + start_pos_y
+
+            indicator.running = true;
+            imag.source= "image://fract/" + xtx.value + "/" + ytx.value + "/" + zoom + "/" + position.priv_x +"/" +position.priv_y
+
+        }
+        onReleased:{
+
+        }
+
 
     }
 
     Image {
         id:imag
         anchors.centerIn: parent ;
-        sourceSize.width: root.width    
+        sourceSize.width: root.width
         sourceSize.height: root.height
 
         onStatusChanged: {
@@ -50,22 +85,104 @@ Item {
         running: false
     }
 
+    RowLayout {
+        id: layout
 
-    ColumnLayout {
-        
-        anchors.margins: spacing
-        RowLayout {
-            
-            SpinBox {
-                id: xtx
-                maximumValue: 10000
-                
+        SpinBox {
+            id: xtx
+            from: 0
+            value: 1000
+            to: 1000 * 1000
+            stepSize: 100
+
+            property int decimals: 3
+            property real realValue: value / 1000
+
+            validator: DoubleValidator {
+                bottom: Math.min(xtx.from, xtx.to)
+                top:  Math.max(xtx.from, xtx.to)
             }
-            
-            SpinBox {
-                id:ytx
-                maximumValue: 10000
+
+            textFromValue: function(value, locale) {
+                return Number(value / 100).toLocaleString(locale, 'f', xtx.decimals)
+            }
+
+            valueFromText: function(text, locale) {
+                return Number.fromLocaleString(locale, text) * 100
             }
         }
+
+        SpinBox {
+            id:ytx
+            from: 0
+            value: 1000
+            to: 1000 * 1000
+            stepSize: 100
+
+            property int decimals: 3
+            property real realValue: value / 1000
+
+            validator: DoubleValidator {
+                bottom: Math.min(ytx.from, ytx.to)
+                top:  Math.max(ytx.from, ytx.to)
+            }
+
+            textFromValue: function(value, locale) {
+                return Number(value / 100).toLocaleString(locale, 'f', ytx.decimals)
+            }
+
+            valueFromText: function(text, locale) {
+                return Number.fromLocaleString(locale, text) * 100
+            }
+
+        }
+
+        SpinBox {
+            id:zoomsb
+            from: 0
+            value: 1000
+            to: 1000 * 1000
+            stepSize: 10
+
+            property int decimals: 3
+            property real realValue: value / 1000
+
+            validator: DoubleValidator {
+                bottom: Math.min(zoomsb.from, zoomsb.to)
+                top:  Math.max(zoomsb.from, zoomsb.to)
+            }
+
+            textFromValue: function(value, locale) {
+                return Number(value / 100).toLocaleString(locale, 'f', zoomsb.decimals)
+            }
+
+            valueFromText: function(text, locale) {
+                return Number.fromLocaleString(locale, text) * 100
+            }
+        }
+
+        Text{
+            id:position
+
+            property real priv_x:0
+            property real priv_y:0
+
+            text:"x:"+priv_x+"\t y:"+priv_y
+
+        }
+
+        Switch
+        {
+            id: mandel_julia
+
+        }
+
+        Label
+        {
+            id: mandel_julia_label
+            text:"julia"
+
+        }
+
     }
 }

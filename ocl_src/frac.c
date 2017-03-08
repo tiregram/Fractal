@@ -8,8 +8,8 @@ void kernel frac(global const float* A,
   int height = B[0];
   int width =  B[1];
 
-  int x = A[2];
-  int y = A[3];
+  float x = A[2];
+  float y = A[3];
 
   int zoom = A[4];
 

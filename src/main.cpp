@@ -17,6 +17,10 @@
 #include <QWidget>
 #include <QtQuick>
 
+
+#include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
+
 //#include <QtWidgets/QPushButton>
 // string readAllFile(ifstream &in) {
 //   stringstream sstr;
@@ -60,15 +64,15 @@ public:
     const int width = requestedSize.width();
     const int height = requestedSize.height();
 
-    std::cout << id .toUtf8().constData() << "\n";
+    std::cout << id.toUtf8().constData() << "\n";
     size->setWidth(width);
     size->setHeight(height);
+    std::string uristr = id .toUtf8().constData();
 
-    std::cout << "lapin is cool " << width << "X" << height << size
-              << std::endl;
-    //uchar * data = new uchar[width * height * 4];
+    std::vector<std::string> arg;
+    boost::split(arg, uristr, boost::is_any_of("/"));
 
-    uchar * data= (uchar*)oc->run(height, width, 0, 0.68, 0, 0,300);
+    uchar * data= (uchar*)oc->run(height, width, 0, 0.68, atof(arg[3].c_str()) , atof(arg[4].c_str()), atof(arg[2].c_str()));
     uchar *ite = data;
 
     for (unsigned int x = 0; x < width*height; ++x) {
@@ -80,7 +84,7 @@ public:
 
 
     QImage image(data, width, height, QImage::Format_ARGB32);
-
+    delete data;
     return image;
   }
 };
@@ -122,43 +126,6 @@ int main(int argc, char *argv[]) {
 
   main_graphique(argc, argv, &oc);
 
-  // sources.push_back({kernel_code.c_str(), kernel_code.length()});
-
-  // cl::Program program(context, sources);
-  // if (program.build({default_device}) != CL_SUCCESS) {
-  //   std::cout << " Error building: "
-  //             << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(default_device)
-  //             << "\n";
-  //   exit(1);
-  // }
-
-  // int size = atoi(argv[1]);
-
-  // cl::CommandQueue queue(context, default_device);
-
-  // queue.enqueueWriteBuffer(buffer_A, CL_TRUE, 0, sizeof(float) * 2, A);
-  // queue.enqueueWriteBuffer(buffer_B, CL_TRUE, 0, sizeof(int) * 1, B);
-
-  // cl::Kernel kernel_add = cl::Kernel(program, "frac");
-
-  // kernel_add.setArg(0, buffer_A);
-  // kernel_add.setArg(1, buffer_B);
-  // kernel_add.setArg(2, buffer_C);
-
-  // queue.enqueueNDRangeKernel(kernel_add, cl::NullRange,
-  //                            cl::NDRange(size * size), cl::NullRange);
-  // queue.finish();
-
-  // int *C = new int[size * size];
-  // queue.enqueueReadBuffer(buffer_C, CL_TRUE, 0, sizeof(int) * size * size,
-  // C);
-  // std::cout << "end calcul" << std::endl;
-
-  // export_image(size, size, std::string(argv[4]), C);
-
-  // delete[] C;
-
-  // return 0;
 }
 
 #include "main.moc"
