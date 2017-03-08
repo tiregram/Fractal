@@ -36,15 +36,15 @@ public:
   void selectByDefault();
   void selectAll();
 
-  unsigned int *run(int h, int w, float jp_x, float jp_y, float x, float y, float zoom) {
+  unsigned int *run(int h, int w, float jp_x, float jp_y, float x, float y, float zoom,int type) {
 
     float A[] = {jp_x, jp_y,x,y,zoom};
-    int B[] = {h, w};
+    int B[] = {h, w,type};
 
     cl::CommandQueue queue(context, this->select_device[0]);
 
     queue.enqueueWriteBuffer(buffer_A, CL_TRUE, 0, sizeof(float) * 5 , A);
-    queue.enqueueWriteBuffer(buffer_B, CL_TRUE, 0, sizeof(int) * 2   , B);
+    queue.enqueueWriteBuffer(buffer_B, CL_TRUE, 0, sizeof(int) * 3   , B);
 
     cl::Kernel kernel_add = cl::Kernel(program, "frac");
 
@@ -90,7 +90,7 @@ public:
     std::cout <<"No build error =)"  << "\n";
 
     this->buffer_A = cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(float) * 5);
-    this->buffer_B = cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(int) * 2);
+    this->buffer_B = cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(int) * 3);
     this->buffer_C =
         cl::Buffer(context, CL_MEM_READ_WRITE, sizeof(int) * max_x * max_y);
 

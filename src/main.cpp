@@ -72,7 +72,7 @@ public:
     std::vector<std::string> arg;
     boost::split(arg, uristr, boost::is_any_of("/"));
 
-    uchar * data= (uchar*)oc->run(height, width, 0, 0.68, atof(arg[3].c_str()) , atof(arg[4].c_str()), atof(arg[2].c_str()));
+    uchar * data= (uchar*)oc->run(height, width, 0, 0.68, atof(arg[3].c_str()) , atof(arg[4].c_str()), atof(arg[2].c_str()),(arg[5][0]=='t')?1:0);
     uchar *ite = data;
 
     for (unsigned int x = 0; x < width*height; ++x) {

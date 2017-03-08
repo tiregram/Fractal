@@ -25,7 +25,7 @@ Item {
 
         onClicked: {
             indicator.running = true;
-            imag.source= "image://fract/" + xtx.value + "/" + ytx.value + "/" + zoom + "/" + position.priv_x +"/" +position.priv_y
+            imag.source= "image://fract/" + xtx.value + "/" + ytx.value + "/" + zoom + "/" + position.priv_x +"/" +position.priv_y+"/"+mandel_julia.checked
         }
 
         onWheel: {
@@ -41,7 +41,7 @@ Item {
             }
 
             indicator.running = true;
-            imag.source= "image://fract/" + xtx.value + "/" + ytx.value + "/" + zoom + "/" + position.priv_x +"/" +position.priv_y
+            imag.source= "image://fract/" + xtx.value + "/" + ytx.value + "/" + zoom + "/" + position.priv_x +"/" +position.priv_y+"/"+mandel_julia.checked
 
         }
 
@@ -57,7 +57,7 @@ Item {
             position.priv_y = + (mouse.y - start_y)/zoom*10 + start_pos_y
 
             indicator.running = true;
-            imag.source= "image://fract/" + xtx.value + "/" + ytx.value + "/" + zoom + "/" + position.priv_x +"/" +position.priv_y
+            imag.source= "image://fract/" + xtx.value + "/" + ytx.value + "/" + zoom + "/" + position.priv_x +"/" +position.priv_y+"/"+mandel_julia.checked
 
         }
         onReleased:{
@@ -181,6 +181,12 @@ Item {
         {
             id: mandel_julia_label
             text:"julia"
+
+        }
+
+        Button
+        {
+            id:go_image
 
         }
 
