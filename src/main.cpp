@@ -115,11 +115,13 @@ int main(int argc, char *argv[]) {
 
   std::cout << "select platforms.device platforms.device default(0.0):"
             << "\n";
+
   std::string plat_dev;
   std::getline(std::cin, plat_dev);
-
   std::cout << plat_dev << "\n";
+
   oc.selectByString(plat_dev);
+  
   oc.print_plat_dev();
 
   oc.loadSource("ocl_src/frac.c", 1920, 1080);

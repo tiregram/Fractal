@@ -119,7 +119,7 @@ bool OpenCLWrapper::selectByString(std::string select) {
     }
 
     if (ip >= all_platforms.size()) {
-      std::cout << "Platfom number is more important than platform available ("
+      std::cout << "Platfom number "<< ip <<" is more important than platform available ("
                 << all_platforms.size() << ")"
                 << "\n";
       continue;
@@ -130,6 +130,7 @@ bool OpenCLWrapper::selectByString(std::string select) {
 
       return true;
     }
+
     if (id < 0) {
       std::cout << "Device number is less than 0"
                 << "\n";

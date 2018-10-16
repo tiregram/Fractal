@@ -4,7 +4,7 @@
 
 #define png_infopp_NULL (png_infopp) NULL
 #define int_p_NULL (int *)NULL
-#include <boost/gil/extension/io/png_dynamic_io.hpp>
+#include <boost/gil/extension/io/png/old.hpp>
 #include <boost/gil/gil_all.hpp>
 
 using namespace boost::gil;
